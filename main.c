@@ -1,26 +1,32 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: nunostreet <nunostreet@student.42.fr>      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/04/09 16:21:52 by nstreet-          #+#    #+#             */
+/*   Updated: 2026/04/09 17:46:51 by nunostreet       ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "codexion.h"
 
-/*
- * ./codexion 5 200 200 200 200 5 200 [edf/fifo]
- */
-
-int main(int ac, char **av)
+int	main(int ac, char **av)
 {
-    t_reunion reunion;
+	t_reunion	reunion;
 
-    if (ac == 9)
-    {
-        // Error checking
-        parse_input(&reunion, av);
-        // Creating the actual thing
-        data_init(&reunion);
-        compilation_start(&reunion);
-        // If all compiles done or burnout happened
-        clean(&reunion);
-    }
-    else
-    {
-        error_exit("Wrong input:\n"
-            BOLD_GREEN"Correct usage is: ./codexion 5 200 200 200 200 5 200 [edf/fifo]"RST);
-    }
+	if (ac != 9)
+		error_exit("Usage: ./codexion n_coders t_burnout t_compile t_debug "
+			"t_refactor n_compiles cooldown [fifo|edf]");
+	parse_input(&reunion, av);
+	printf("coders: %ld\n", reunion.number_of_coders);
+	printf("burnout: %ld\n", reunion.time_to_burnout);
+	printf("compile: %ld\n", reunion.time_to_compile);
+	printf("debug: %ld\n", reunion.time_to_debug);
+	printf("refactor: %ld\n", reunion.time_to_refactor);
+	printf("compiles required: %ld\n", reunion.number_of_compiles_required);
+	printf("cooldown: %ld\n", reunion.dongle_cooldown);
+	printf("scheduler: %s\n", reunion.scheduler);
+	return (0);
 }
