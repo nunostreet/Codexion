@@ -1,25 +1,33 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   utils.c                                            :+:      :+:    :+:   */
+/*   parsing_scheduler.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: nstreet- <nstreet-@student.42lisboa.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/04/09 16:22:13 by nstreet-          #+#    #+#             */
+/*   Created: 2026/04/09 17:23:00 by nstreet-          #+#    #+#             */
 /*   Updated: 2026/04/09 17:45:00 by nstreet-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
 
-void	error_exit(const char *error)
+static int	ft_strcmp(const char *s1, const char *s2)
 {
-	printf(BOLD_RED "%s\n" RST, error);
-	exit(EXIT_FAILURE);
+	while (*s1 && *s1 == *s2)
+	{
+		++s1;
+		++s2;
+	}
+	return ((unsigned char)*s1 - (unsigned char)*s2);
 }
 
-void	error_field(const char *field, const char *error)
+void	parse_scheduler(t_reunion *reunion, char *arg)
 {
-	printf(BOLD_RED "%s: %s\n" RST, field, error);
-	exit(EXIT_FAILURE);
+	if (ft_strcmp(arg, "edf") == 0)
+		reunion->scheduler = "edf";
+	else if (ft_strcmp(arg, "fifo") == 0)
+		reunion->scheduler = "fifo";
+	else
+		error_field("scheduler", "must be 'edf' or 'fifo'");
 }
