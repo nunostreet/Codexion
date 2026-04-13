@@ -2,7 +2,7 @@ NAME = codexion
 CC = cc
 CFLAGS = -Wall -Wextra -Werror
 CPPFLAGS = -I.
-SRCS = main.c parsing/parsing.c parsing/parsing_numbers.c \
+SRCS = main.c init.c parsing/parsing.c parsing/parsing_numbers.c \
 	parsing/parsing_scheduler.c utils.c
 OBJS = $(SRCS:.c=.o)
 
