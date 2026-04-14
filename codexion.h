@@ -6,7 +6,7 @@
 /*   By: nunostreet <nunostreet@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/09 16:21:43 by nstreet-          #+#    #+#             */
-/*   Updated: 2026/04/14 14:45:57 by nunostreet       ###   ########.fr       */
+/*   Updated: 2026/04/14 15:08:31 by nunostreet       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,18 @@
 # define BOLD_MAGENTA "\033[1;35m"
 # define BOLD_CYAN "\033[1;36m"
 # define BOLD_WHITE "\033[1;37m"
+
+
+typedef enum e_opcode
+{
+	LOCK,
+	UNLOCK,
+	INIT,
+	DESTROY,
+	CREATE,
+	JOIN,
+	DETACH,
+}	t_opcode;
 
 typedef pthread_mutex_t	t_mtx;
 
@@ -86,5 +98,11 @@ void	parse_input(t_reunion *reunion, char **av);
 long	get_time_ms(void);
 long	elapsed_ms(long start);
 void	smart_sleep(t_reunion *reunion, long duration);
+void	safe_mutex_handle(t_mtx *mutex, t_opcode opcode);
+void	set_bool(t_mtx *mutex, bool *dest, bool value);
+bool	get_bool(t_mtx *mutex, bool *value);
+void	set_long(t_mtx *mutex, long *dest, long value);
+long	get_long(t_mtx *mutex, long *value);
+void	increment_long(t_mtx *mutex, long *value);
 
 #endif
