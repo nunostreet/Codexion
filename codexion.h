@@ -6,7 +6,7 @@
 /*   By: nunostreet <nunostreet@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/09 16:21:43 by nstreet-          #+#    #+#             */
-/*   Updated: 2026/04/13 12:43:40 by nunostreet       ###   ########.fr       */
+/*   Updated: 2026/04/14 14:45:57 by nunostreet       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,11 +70,21 @@ typedef struct s_reunion
 	pthread_t	monitor_thread;
 }	t_reunion;
 
+typedef struct s_request
+{
+	struct s_coder	*coder;
+	long			priority;
+	long			seq;
+}	t_request;
+
 void	error_exit(const char *error);
 void	error_field(const char *field, const char *error);
 int		init_reunion(t_reunion *reunion);
 long	parse_long_arg(const char *str, const char *field_name);
 void	parse_scheduler(t_reunion *reunion, char *arg);
 void	parse_input(t_reunion *reunion, char **av);
+long	get_time_ms(void);
+long	elapsed_ms(long start);
+void	smart_sleep(t_reunion *reunion, long duration);
 
 #endif
