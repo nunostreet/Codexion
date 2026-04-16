@@ -1,15 +1,16 @@
 #include "codexion.h"
 
-void	set_bool(t_mtx *mutex, bool *dest, bool value)
+/* Model to avoid writing LOCK / UNLOCK everywhere */
+void	set_bool(t_mtx *mutex, t_bool *dest, t_bool value)
 {
 	safe_mutex_handle(mutex, LOCK);
 	*dest = value;
 	safe_mutex_handle(mutex, UNLOCK);
 }
 
-bool	get_bool(t_mtx *mutex, bool *value)
+t_bool	get_bool(t_mtx *mutex, t_bool *value)
 {
-	bool	result;
+	t_bool	result;
 
 	safe_mutex_handle(mutex, LOCK);
 	result = *value;
