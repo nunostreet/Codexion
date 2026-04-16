@@ -6,7 +6,7 @@
 /*   By: nunostreet <nunostreet@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/13 12:50:46 by nunostreet        #+#    #+#             */
-/*   Updated: 2026/04/13 13:35:00 by nunostreet       ###   ########.fr       */
+/*   Updated: 2026/04/16 15:20:39 by nunostreet       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,8 @@ int	init_reunion(t_reunion *reunion)
 {
 	reunion->coders = NULL;
 	reunion->dongles = NULL;
-	reunion->end_simulation = false;
+	reunion->end_simulation = FALSE;
+	reunion->all_threads_ready = FALSE;
 	if (alloc_arrays(reunion))
 		return (1);
 	if (init_mutexes(reunion))
@@ -67,7 +68,7 @@ static int	init_dongles(t_reunion *reunion)
 	while (i < reunion->number_of_coders)
 	{
 		reunion->dongles[i].dongle_id = i + 1;
-		reunion->dongles[i].available = true;
+		reunion->dongles[i].available = TRUE;
 		reunion->dongles[i].available_at = reunion->start_simulation;
 		if (pthread_mutex_init(&reunion->dongles[i].mutex, NULL) != 0)
 		{
