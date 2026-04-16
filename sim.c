@@ -1,6 +1,6 @@
 #include "codexion.h"
 
-bool	simulation_finished(t_reunion *reunion)
+t_bool	simulation_finished(t_reunion *reunion)
 {
 	return (get_bool(&reunion->state_mutex, &reunion->end_simulation));
 }
@@ -11,8 +11,7 @@ void	*code_simulation(void *data)
 
 	coder = (t_coder *)data;
 	wait_all_threads(coder->reunion);
-
-	while (!simulation_finished(coder->reunion))
+	while (!simulation_has_ended(coder->reunion) && !coder->finished)
 	{
 		if (coder->all_compiled)
 			break;

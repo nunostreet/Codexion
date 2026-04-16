@@ -43,7 +43,7 @@ typedef enum e_opcode
 	DESTROY,
 	CREATE,
 	JOIN,
-	DETACH,
+	DETACH
 }	t_opcode;
 
 typedef pthread_mutex_t	t_mtx;
@@ -80,7 +80,7 @@ typedef struct s_reunion
 	long		start_simulation;
 	char		*scheduler;
 	t_bool		end_simulation;
-    t_bool		all_threads_ready;
+	t_bool		all_threads_ready;
 	t_coder		*coders;
 	t_dongle	*dongles;
 	t_mtx		write_mutex;
@@ -128,12 +128,12 @@ void	start_simulation(t_reunion *reunion);
 void	*code_simulation(void *data);
 void	*monitor_simulation(void *data);
 
-void	wait_all_threads(t_reunion *reunion); // spinlock
+void	wait_all_threads(t_reunion *reunion); /* spinlock */
 t_bool	simulation_has_ended(t_reunion *reunion);
 void	stop_simulation(t_reunion *reunion);
 
 void	print_state(t_coder *coder, const char *msg);
-void	precise_sleep(t_reunion *reunion, long duration); // needed?
+void	precise_sleep(t_reunion *reunion, long duration); /* needed? */
 
 t_bool	try_take_dongles(t_coder *coder);
 void	release_dongles(t_coder *coder);

@@ -12,12 +12,12 @@
 
 #include "codexion.h"
 
-static bool	ft_isdigit(int c)
+static t_bool	ft_isdigit(int c)
 {
 	return (c >= '0' && c <= '9');
 }
 
-static bool	ft_isspace(int c)
+static t_bool	ft_isspace(int c)
 {
 	return ((c >= 9 && c <= 13) || c == ' ');
 }

@@ -1,6 +1,6 @@
 NAME = codexion
 CC = cc
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror -std=c89 -pedantic-errors
 CPPFLAGS = -I.
 SRCS = main.c init.c time.c safe_functions.c getters_setters.c \
 	parsing/parsing.c parsing/parsing_numbers.c \
