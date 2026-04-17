@@ -6,7 +6,7 @@
 /*   By: nunostreet <nunostreet@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/09 16:21:52 by nstreet-          #+#    #+#             */
-/*   Updated: 2026/04/16 17:22:57 by nunostreet       ###   ########.fr       */
+/*   Updated: 2026/04/17 13:44:36 by nunostreet       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,11 +27,3 @@ int	main(int ac, char **av)
 	cleanup_reunion(&reunion);
 	return (0);
 }
-/*     printf("coders: %ld\n", reunion.number_of_coders);
-	printf("burnout: %ld\n", reunion.time_to_burnout);
-	printf("compile: %ld\n", reunion.time_to_compile);
-	printf("debug: %ld\n", reunion.time_to_debug);
-	printf("refactor: %ld\n", reunion.time_to_refactor);
-	printf("compiles required: %ld\n", reunion.number_of_compiles_required);
-	printf("cooldown: %ld\n", reunion.dongle_cooldown);
-	printf("scheduler: %s\n", reunion.scheduler); */

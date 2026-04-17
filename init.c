@@ -50,11 +50,11 @@ static int	alloc_arrays(t_reunion *reunion)
 
 static int	init_mutexes(t_reunion *reunion)
 {
-	if (pthread_mutex_init(&reunion->write_mutex, NULL) != 0)
+	if (pthread_mutex_init(&reunion->mutexes.write, NULL) != 0)
 		return (1);
-	if (pthread_mutex_init(&reunion->state_mutex, NULL) != 0)
+	if (pthread_mutex_init(&reunion->mutexes.state, NULL) != 0)
 	{
-		pthread_mutex_destroy(&reunion->write_mutex);
+		pthread_mutex_destroy(&reunion->mutexes.write);
 		return (1);
 	}
 	return (0);
@@ -74,8 +74,8 @@ static int	init_dongles(t_reunion *reunion)
 		{
 			while (--i >= 0)
 				pthread_mutex_destroy(&reunion->dongles[i].mutex);
-			pthread_mutex_destroy(&reunion->write_mutex);
-			pthread_mutex_destroy(&reunion->state_mutex);
+			pthread_mutex_destroy(&reunion->mutexes.write);
+			pthread_mutex_destroy(&reunion->mutexes.state);
 			return (1);
 		}
 		i++;
@@ -93,6 +93,7 @@ static void	init_coders(t_reunion *reunion)
 		reunion->coders[i].id = i + 1;
 		reunion->coders[i].compile_counter = 0;
 		reunion->coders[i].last_compile_start = reunion->start_simulation;
+		reunion->coders[i].finished = FALSE;
 		reunion->coders[i].left_dongle = &reunion->dongles[i];
 		reunion->coders[i].right_dongle = &reunion->dongles[(i + 1)
 			% reunion->number_of_coders];

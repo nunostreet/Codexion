@@ -6,7 +6,7 @@
 /*   By: nunostreet <nunostreet@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/09 16:21:43 by nstreet-          #+#    #+#             */
-/*   Updated: 2026/04/16 15:14:11 by nunostreet       ###   ########.fr       */
+/*   Updated: 2026/04/17 13:07:57 by nunostreet       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,11 +29,10 @@
 # define BOLD_CYAN "\033[1;36m"
 # define BOLD_WHITE "\033[1;37m"
 
-typedef	int	t_bool;
+typedef int	t_bool;
 
 # define TRUE 1
 # define FALSE 0
-
 
 typedef enum e_opcode
 {
@@ -46,14 +45,12 @@ typedef enum e_opcode
 	DETACH
 }	t_opcode;
 
-typedef pthread_mutex_t	t_mtx;
-
 typedef struct s_dongle
 {
-	t_mtx	mutex;
-	int		dongle_id;
-	t_bool	available;
-	long	available_at;
+	pthread_mutex_t	mutex;
+	int				dongle_id;
+	t_bool			available;
+	long			available_at;
 }	t_dongle;
 
 typedef struct s_coder
@@ -67,6 +64,12 @@ typedef struct s_coder
 	t_dongle			*right_dongle;
 	struct s_reunion	*reunion;
 }	t_coder;
+
+typedef struct s_mutexes
+{
+	pthread_mutex_t	write;
+	pthread_mutex_t	state;
+}	t_mutexes;
 
 typedef struct s_reunion
 {
@@ -83,8 +86,7 @@ typedef struct s_reunion
 	t_bool		all_threads_ready;
 	t_coder		*coders;
 	t_dongle	*dongles;
-	t_mtx		write_mutex;
-	t_mtx		state_mutex;
+	t_mutexes	mutexes;
 	pthread_t	monitor_thread;
 }	t_reunion;
 
@@ -95,48 +97,58 @@ typedef struct s_request
 	long			seq;
 }	t_request;
 
-/* Parsing arguments */
-long	parse_long_arg(const char *str, const char *field_name);
-void	parse_scheduler(t_reunion *reunion, char *arg);
-void	parse_input(t_reunion *reunion, char **av);
-
-/* Error helpers */
+/* utils.c */
 void	error_exit(const char *error);
 void	error_field(const char *field, const char *error);
 
-/* Initializing variables */
+/* parsing/parsing_numbers.c */
+long	parse_long_arg(const char *str, const char *field_name);
+
+/* parsing/parsing_scheduler.c */
+void	parse_scheduler(t_reunion *reunion, char *arg);
+
+/* parsing/parsing.c */
+void	parse_input(t_reunion *reunion, char **av);
+
+/* init.c */
 int		init_reunion(t_reunion *reunion);
 
-/* Time functions */
+/* time.c */
 long	get_time_ms(void);
 long	elapsed_ms(long start);
+void	precise_sleep(t_reunion *reunion, long duration);
 
-/* Safe functions to handle errors */
-void	safe_mutex_handle(t_mtx *mutex, t_opcode opcode);
-void	safe_thread_handle(pthread_t *thread, void *(*foo)(void *), void *data,
-t_opcode opcode);
+/* safe_functions.c */
+void	safe_mutex_handle(pthread_mutex_t *mutex, t_opcode opcode);
+void	safe_thread_handle(pthread_t *thread,
+			void *(*foo)(void *),
+			void *data,
+			t_opcode opcode);
 
-/* Getters and setters to avoid repetition */
-void	set_bool(t_mtx *mutex, t_bool *dest, t_bool value);
-t_bool	get_bool(t_mtx *mutex, t_bool *value);
-void	set_long(t_mtx *mutex, long *dest, long value);
-long	get_long(t_mtx *mutex, long *value);
-void	increment_long(t_mtx *mutex, long *value);
+/* getters_setters.c */
+void	set_bool(pthread_mutex_t *mutex, t_bool *dest, t_bool value);
+t_bool	get_bool(pthread_mutex_t *mutex, t_bool *value);
+void	set_long(pthread_mutex_t *mutex, long *dest, long value);
+long	get_long(pthread_mutex_t *mutex, long *value);
+void	increment_long(pthread_mutex_t *mutex, long *value);
 
-/* Simulation functions */
+/* coders.c */
+void	grab_dongles(t_coder *coder);
+void	compile(t_coder *coder);
+void	debug(t_coder *coder);
+void	refactor(t_coder *coder);
+void	drop_dongles(t_coder *coder);
+
+/* sim.c */
 void	start_simulation(t_reunion *reunion);
 void	*code_simulation(void *data);
 void	*monitor_simulation(void *data);
-
-void	wait_all_threads(t_reunion *reunion); /* spinlock */
 t_bool	simulation_has_ended(t_reunion *reunion);
 void	stop_simulation(t_reunion *reunion);
 
+/* synchro_utils.c */
 void	print_state(t_coder *coder, const char *msg);
-void	precise_sleep(t_reunion *reunion, long duration); /* needed? */
-
-t_bool	try_take_dongles(t_coder *coder);
-void	release_dongles(t_coder *coder);
+void	wait_all_threads(t_reunion *reunion);
 void	cleanup_reunion(t_reunion *reunion);
 
 #endif

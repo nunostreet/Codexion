@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   safe_functions.c                                   :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: nunostreet <nunostreet@student.42.fr>      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/04/16 22:40:00 by nunostreet        #+#    #+#             */
+/*   Updated: 2026/04/16 22:40:00 by nunostreet       ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "codexion.h"
 #include <errno.h>
 
@@ -22,7 +34,7 @@ static void	handle_mutex_error(int status, t_opcode opcode)
 	error_exit("Mutex operation failed");
 }
 
-void	safe_mutex_handle(t_mtx *mutex, t_opcode opcode)
+void	safe_mutex_handle(pthread_mutex_t *mutex, t_opcode opcode)
 {
 	int	status;
 
@@ -60,7 +72,7 @@ static void	handle_thread_error(int status, t_opcode opcode)
 }
 
 void	safe_thread_handle(pthread_t *thread, void *(*foo)(void *), void *data,
-		t_opcode opcode)
+	t_opcode opcode)
 {
 	int	status;
 

@@ -3,8 +3,8 @@ CC = cc
 CFLAGS = -Wall -Wextra -Werror -std=c89 -pedantic-errors
 CPPFLAGS = -I.
 SRCS = main.c init.c time.c safe_functions.c getters_setters.c \
-	parsing/parsing.c parsing/parsing_numbers.c \
-	parsing/parsing_scheduler.c utils.c
+	coders.c sim.c monitor.c synchro_utils.c parsing/parsing.c \
+	parsing/parsing_numbers.c parsing/parsing_scheduler.c utils.c
 OBJS = $(SRCS:.c=.o)
 
 all: $(NAME)
