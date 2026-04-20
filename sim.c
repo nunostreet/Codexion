@@ -72,6 +72,14 @@ void	start_simulation(t_reunion *reunion)
 	safe_thread_handle(&reunion->monitor_thread,
 		monitor_simulation, reunion, CREATE);
 	reunion->start_simulation = get_time_ms();
+	i = 0;
+	while (i < reunion->number_of_coders)
+	{
+		set_long(&reunion->mutexes.state,
+			&reunion->coders[i].last_compile_start,
+			reunion->start_simulation);
+		i++;
+	}
 	set_bool(&reunion->mutexes.state, &reunion->all_threads_ready, TRUE);
 	i = 0;
 	while (i < reunion->number_of_coders)

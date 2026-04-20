@@ -35,21 +35,15 @@ static t_req	build_request(t_dongle *d, t_coder *coder)
 	return (req);
 }
 
-/* Blocks on timedwait until this coder is at the top of the queue. */
+/* Blocks on cond_wait until this coder is at the top of the queue. */
 static void	wait_for_grant(t_dongle *d, t_coder *coder, t_req req)
 {
-	struct timespec	ts;
-	long			wake;
-
 	while (!simulation_has_ended(coder->reunion))
 	{
 		if (heap_peek(d->queue, d->queue_size).coder_idx == req.coder_idx
-			&& !d->occupied && get_time_ms() >= d->available_at)
+			&& !d->occupied)
 			break ;
-		wake = get_time_ms() + 1;
-		ts.tv_sec = wake / 1000;
-		ts.tv_nsec = (wake % 1000) * 1000000L;
-		pthread_cond_timedwait(&d->condition, &d->mutex, &ts);
+		pthread_cond_wait(&d->condition, &d->mutex);
 	}
 }
 
@@ -67,13 +61,15 @@ void	request_dongle(t_dongle *d, t_coder *coder)
 	safe_mutex_handle(&d->mutex, UNLOCK);
 }
 
-/* Pops this coder's request, sets the cooldown, and wakes all waiters. */
+/* Pops this coder's request, sleeps for cooldown, then releases and wakes waiters. */
 void	release_dongle(t_dongle *d, long cooldown)
 {
 	safe_mutex_handle(&d->mutex, LOCK);
 	heap_pop(d->queue, &d->queue_size);
+	safe_mutex_handle(&d->mutex, UNLOCK);
+	ft_sleep_ms(cooldown);
+	safe_mutex_handle(&d->mutex, LOCK);
 	d->occupied = FALSE;
-	d->available_at = get_time_ms() + cooldown;
 	pthread_cond_broadcast(&d->condition);
 	safe_mutex_handle(&d->mutex, UNLOCK);
 }

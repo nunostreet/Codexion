@@ -12,10 +12,20 @@
 
 #include "codexion.h"
 
-/* Sets end_simulation to TRUE to signal all threads to stop. */
+/* Sets end_simulation to TRUE and wakes all threads blocked on dongle condvars. */
 void	stop_simulation(t_reunion *reunion)
 {
+	int	i;
+
 	set_bool(&reunion->mutexes.state, &reunion->end_simulation, TRUE);
+	i = 0;
+	while (i < reunion->number_of_coders)
+	{
+		safe_mutex_handle(&reunion->dongles[i].mutex, LOCK);
+		pthread_cond_broadcast(&reunion->dongles[i].condition);
+		safe_mutex_handle(&reunion->dongles[i].mutex, UNLOCK);
+		i++;
+	}
 }
 
 static t_bool	coder_burned_out(t_coder *coder)
