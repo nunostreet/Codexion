@@ -78,7 +78,7 @@ void	*monitor_simulation(void *data)
 			stop_simulation(reunion);
 			return (NULL);
 		}
-		usleep(1000);
+		ft_sleep_ms(1);
 	}
 	return (NULL);
 }

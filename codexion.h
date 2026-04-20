@@ -13,6 +13,8 @@
 #ifndef CODEXION_H
 # define CODEXION_H
 
+# define _POSIX_C_SOURCE 200809L
+
 # include <limits.h>
 # include <pthread.h>
 # include <stdio.h>
@@ -123,6 +125,7 @@ int		init_reunion(t_reunion *reunion);
 /* time.c */
 long	get_time_ms(void);
 long	elapsed_ms(long start);
+void	ft_sleep_ms(long ms);
 void	precise_sleep(t_reunion *reunion, long duration);
 
 /* safe_functions.c */

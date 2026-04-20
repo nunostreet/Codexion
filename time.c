@@ -28,6 +28,16 @@ long	elapsed_ms(long start)
 	return (get_time_ms() - start);
 }
 
+/* Sleeps for the given number of milliseconds using nanosleep. */
+void	ft_sleep_ms(long ms)
+{
+	struct timespec	ts;
+
+	ts.tv_sec = ms / 1000;
+	ts.tv_nsec = (ms % 1000) * 1000000L;
+	nanosleep(&ts, NULL);
+}
+
 /* Sleeps for duration ms, checking every 1-5ms to avoid overshooting. */
 void	precise_sleep(t_reunion *reunion, long duration)
 {
@@ -42,8 +52,8 @@ void	precise_sleep(t_reunion *reunion, long duration)
 		elapsed = elapsed_ms(start);
 		remaining = duration - elapsed;
 		if (remaining > 10)
-			usleep(1000 * 5);
+			ft_sleep_ms(5);
 		else
-			usleep(1000);
+			ft_sleep_ms(1);
 	}
 }

@@ -1,6 +1,6 @@
 NAME = codexion
 CC = cc
-CFLAGS = -Wall -Wextra -Werror -std=c89 -pedantic-errors
+CFLAGS = -Wall -Wextra -Werror -std=c89 -pedantic-errors -D_POSIX_C_SOURCE=199309L
 CPPFLAGS = -I.
 SRCS = main.c init.c time.c safe_functions.c getters_setters.c \
 	coders.c sim.c monitor.c synchro_utils.c heap.c dongles.c \

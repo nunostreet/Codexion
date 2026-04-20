@@ -42,13 +42,13 @@ void	*code_simulation(void *data)
 	coder = (t_coder *)data;
 	wait_all_threads(coder->reunion);
 	if (coder->id % 2 == 0)
-		usleep(1000);
+		ft_sleep_ms(1);
 	set_long(&coder->reunion->mutexes.state,
 		&coder->last_compile_start, get_time_ms());
 	if (coder->left_dongle == coder->right_dongle)
 	{
 		while (!simulation_has_ended(coder->reunion))
-			usleep(1000);
+			ft_sleep_ms(1);
 		return (NULL);
 	}
 	coder_loop(coder);

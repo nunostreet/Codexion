@@ -6,7 +6,7 @@
 /*   By: nunostreet <nunostreet@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/09 16:21:58 by nstreet-          #+#    #+#             */
-/*   Updated: 2026/04/20 14:20:54 by nunostreet       ###   ########.fr       */
+/*   Updated: 2026/04/20 18:05:26 by nunostreet       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,17 +31,17 @@ static void	validate_numeric_args(t_reunion *reunion)
 	if (reunion->number_of_coders <= 0)
 		error_field("number_of_coders", "must be greater than 0");
 	if (reunion->time_to_burnout <= 0)
-		error_field("time_to_burnout", "must be at least 60 ms");
+		error_field("time_to_burnout", "must be at least 0 ms");
 	if (reunion->time_to_compile < 0)
-		error_field("time_to_compile", "must be at least 60 ms");
+		error_field("time_to_compile", "must be at least 0 ms");
 	if (reunion->time_to_debug < 0)
-		error_field("time_to_debug", "must be at least 60 ms");
+		error_field("time_to_debug", "must be at least 0 ms");
 	if (reunion->time_to_refactor < 0)
-		error_field("time_to_refactor", "must be at least 60 ms");
+		error_field("time_to_refactor", "must be at least 0 ms");
 	if (reunion->number_of_compiles_required <= 0)
 		error_field("number_of_compiles_required", "must be greater than 0");
 	if (reunion->dongle_cooldown < 0)
-		error_field("dongle_cooldown", "must be at least 60 ms");
+		error_field("dongle_cooldown", "must be at least 0 ms");
 }
 
 /* Parses and validates all command-line arguments into reunion. */
