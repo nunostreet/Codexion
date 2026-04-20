@@ -12,7 +12,7 @@
 
 #include "codexion.h"
 
-/* Model to avoid writing LOCK / UNLOCK everywhere */
+/* Writes a t_bool under the given mutex. */
 void	set_bool(pthread_mutex_t *mutex, t_bool *dest, t_bool value)
 {
 	safe_mutex_handle(mutex, LOCK);
@@ -20,6 +20,7 @@ void	set_bool(pthread_mutex_t *mutex, t_bool *dest, t_bool value)
 	safe_mutex_handle(mutex, UNLOCK);
 }
 
+/* Reads a t_bool under the given mutex. */
 t_bool	get_bool(pthread_mutex_t *mutex, t_bool *value)
 {
 	t_bool	result;
@@ -30,6 +31,7 @@ t_bool	get_bool(pthread_mutex_t *mutex, t_bool *value)
 	return (result);
 }
 
+/* Writes a long under the given mutex. */
 void	set_long(pthread_mutex_t *mutex, long *dest, long value)
 {
 	safe_mutex_handle(mutex, LOCK);
@@ -37,6 +39,7 @@ void	set_long(pthread_mutex_t *mutex, long *dest, long value)
 	safe_mutex_handle(mutex, UNLOCK);
 }
 
+/* Reads a long under the given mutex. */
 long	get_long(pthread_mutex_t *mutex, long *value)
 {
 	long	result;
@@ -47,6 +50,7 @@ long	get_long(pthread_mutex_t *mutex, long *value)
 	return (result);
 }
 
+/* Increments a long atomically under the given mutex. */
 void	increment_long(pthread_mutex_t *mutex, long *value)
 {
 	safe_mutex_handle(mutex, LOCK);

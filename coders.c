@@ -12,17 +12,12 @@
 
 #include "codexion.h"
 
+/* Acquires both dongles in dongle_id order to prevent deadlock. */
 void	grab_dongles(t_coder *coder)
 {
 	t_dongle	*first;
 	t_dongle	*second;
 
-	if (coder->left_dongle == coder->right_dongle)
-	{
-		safe_mutex_handle(&coder->left_dongle->mutex, LOCK);
-		print_state(coder, "has taken a dongle");
-		return ;
-	}
 	if (coder->left_dongle->dongle_id < coder->right_dongle->dongle_id)
 	{
 		first = coder->left_dongle;
@@ -33,56 +28,57 @@ void	grab_dongles(t_coder *coder)
 		first = coder->right_dongle;
 		second = coder->left_dongle;
 	}
-	safe_mutex_handle(&first->mutex, LOCK);
+	request_dongle(first, coder);
 	print_state(coder, "has taken a dongle");
-	safe_mutex_handle(&second->mutex, LOCK);
+	request_dongle(second, coder);
 	print_state(coder, "has taken a dongle");
 }
 
+/* Releases both dongles with cooldown in reverse acquisition order. */
+void	drop_dongles(t_coder *coder)
+{
+	t_dongle	*first;
+	t_dongle	*second;
+	long		cooldown;
+
+	cooldown = coder->reunion->dongle_cooldown;
+	if (coder->left_dongle->dongle_id < coder->right_dongle->dongle_id)
+	{
+		first = coder->left_dongle;
+		second = coder->right_dongle;
+	}
+	else
+	{
+		first = coder->right_dongle;
+		second = coder->left_dongle;
+	}
+	release_dongle(second, cooldown);
+	release_dongle(first, cooldown);
+}
+
+/* Prints state and sleeps for the debug phase duration. */
 void	debug(t_coder *coder)
 {
 	print_state(coder, "is debugging");
 	precise_sleep(coder->reunion, coder->reunion->time_to_debug);
 }
 
+/* Resets the burnout timer, increments counter, sleeps for compile duration. */
 void	compile(t_coder *coder)
 {
-	increment_long(&coder->reunion->mutexes.state, &coder->compile_counter);
-	print_state(coder, "is compiling");
 	set_long(&coder->reunion->mutexes.state, &coder->last_compile_start,
 		get_time_ms());
+	increment_long(&coder->reunion->mutexes.state, &coder->compile_counter);
+	print_state(coder, "is compiling");
 	precise_sleep(coder->reunion, coder->reunion->time_to_compile);
 	if (get_long(&coder->reunion->mutexes.state, &coder->compile_counter)
 		>= coder->reunion->number_of_compiles_required)
 		set_bool(&coder->reunion->mutexes.state, &coder->finished, TRUE);
 }
 
+/* Prints state and sleeps for the refactor phase duration. */
 void	refactor(t_coder *coder)
 {
 	print_state(coder, "is refactoring");
 	precise_sleep(coder->reunion, coder->reunion->time_to_refactor);
-}
-
-void	drop_dongles(t_coder *coder)
-{
-	t_dongle	*first;
-	t_dongle	*second;
-
-	if (coder->left_dongle == coder->right_dongle)
-	{
-		safe_mutex_handle(&coder->left_dongle->mutex, UNLOCK);
-		return ;
-	}
-	if (coder->left_dongle->dongle_id < coder->right_dongle->dongle_id)
-	{
-		first = coder->left_dongle;
-		second = coder->right_dongle;
-	}
-	else
-	{
-		first = coder->right_dongle;
-		second = coder->left_dongle;
-	}
-	safe_mutex_handle(&second->mutex, UNLOCK);
-	safe_mutex_handle(&first->mutex, UNLOCK);
 }

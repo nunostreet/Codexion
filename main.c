@@ -12,6 +12,7 @@
 
 #include "codexion.h"
 
+/* Parses arguments, initialises the simulation, runs it, and cleans up. */
 int	main(int ac, char **av)
 {
 	t_reunion	reunion;

@@ -13,6 +13,7 @@
 #include "codexion.h"
 #include <errno.h>
 
+/* Prints a descriptive error and exits if the mutex operation failed. */
 static void	handle_mutex_error(int status, t_opcode opcode)
 {
 	if (status == 0)
@@ -34,6 +35,7 @@ static void	handle_mutex_error(int status, t_opcode opcode)
 	error_exit("Mutex operation failed");
 }
 
+/* Performs a mutex operation and exits on error. */
 void	safe_mutex_handle(pthread_mutex_t *mutex, t_opcode opcode)
 {
 	int	status;
@@ -52,6 +54,7 @@ void	safe_mutex_handle(pthread_mutex_t *mutex, t_opcode opcode)
 	handle_mutex_error(status, opcode);
 }
 
+/* Prints a descriptive error and exits if the thread operation failed. */
 static void	handle_thread_error(int status, t_opcode opcode)
 {
 	if (status == 0)
@@ -71,6 +74,7 @@ static void	handle_thread_error(int status, t_opcode opcode)
 	error_exit("Thread operation failed");
 }
 
+/* Performs a thread operation (create/join/detach) and exits on error. */
 void	safe_thread_handle(pthread_t *thread, void *(*foo)(void *), void *data,
 	t_opcode opcode)
 {

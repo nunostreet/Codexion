@@ -6,12 +6,13 @@
 /*   By: nunostreet <nunostreet@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/16 22:40:00 by nunostreet        #+#    #+#             */
-/*   Updated: 2026/04/16 22:40:00 by nunostreet       ###   ########.fr       */
+/*   Updated: 2026/04/20 17:05:31 by nunostreet       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
 
+/* Returns the current time in milliseconds since the Unix epoch. */
 long	get_time_ms(void)
 {
 	struct timeval	tv;
@@ -21,11 +22,13 @@ long	get_time_ms(void)
 	return (tv.tv_sec * 1000L + tv.tv_usec / 1000L);
 }
 
+/* Returns milliseconds elapsed since start. */
 long	elapsed_ms(long start)
 {
 	return (get_time_ms() - start);
 }
 
+/* Sleeps for duration ms, checking every 1-5ms to avoid overshooting. */
 void	precise_sleep(t_reunion *reunion, long duration)
 {
 	long	start;

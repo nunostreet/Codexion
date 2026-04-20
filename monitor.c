@@ -12,6 +12,7 @@
 
 #include "codexion.h"
 
+/* Sets end_simulation to TRUE to signal all threads to stop. */
 void	stop_simulation(t_reunion *reunion)
 {
 	set_bool(&reunion->mutexes.state, &reunion->end_simulation, TRUE);
@@ -61,6 +62,7 @@ static t_bool	burnout_detected(t_reunion *reunion)
 	return (FALSE);
 }
 
+/* Monitor thread: checks for burnout every 1ms and stops the simulation. */
 void	*monitor_simulation(void *data)
 {
 	t_reunion	*reunion;

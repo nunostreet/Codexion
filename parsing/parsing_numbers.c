@@ -12,16 +12,19 @@
 
 #include "codexion.h"
 
+/* Returns TRUE if c is an ASCII digit. */
 static t_bool	ft_isdigit(int c)
 {
 	return (c >= '0' && c <= '9');
 }
 
+/* Returns TRUE if c is a whitespace character. */
 static t_bool	ft_isspace(int c)
 {
 	return ((c >= 9 && c <= 13) || c == ' ');
 }
 
+/* Validates format and returns pointer to the digit sequence, or exits. */
 static const char	*valid_input(const char *str, const char *field_name)
 {
 	int			len;
@@ -49,6 +52,7 @@ static const char	*valid_input(const char *str, const char *field_name)
 	return (number);
 }
 
+/* Parses a non-negative integer string into a long, or exits on error. */
 long	parse_long_arg(const char *str, const char *field_name)
 {
 	long	num;

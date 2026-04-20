@@ -6,12 +6,13 @@
 /*   By: nunostreet <nunostreet@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/09 16:21:58 by nstreet-          #+#    #+#             */
-/*   Updated: 2026/04/10 10:01:21 by nunostreet       ###   ########.fr       */
+/*   Updated: 2026/04/20 14:20:54 by nunostreet       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
 
+/* Parses all numeric arguments from argv into the reunion struct. */
 static void	parse_numeric_args(t_reunion *reunion, char **av)
 {
 	reunion->number_of_coders = parse_long_arg(av[1], "number_of_coders");
@@ -24,24 +25,26 @@ static void	parse_numeric_args(t_reunion *reunion, char **av)
 	reunion->dongle_cooldown = parse_long_arg(av[7], "dongle_cooldown");
 }
 
+/* Exits with an error if any numeric argument is out of valid range. */
 static void	validate_numeric_args(t_reunion *reunion)
 {
 	if (reunion->number_of_coders <= 0)
 		error_field("number_of_coders", "must be greater than 0");
-	if (reunion->time_to_burnout < 60)
+	if (reunion->time_to_burnout <= 0)
 		error_field("time_to_burnout", "must be at least 60 ms");
-	if (reunion->time_to_compile < 60)
+	if (reunion->time_to_compile < 0)
 		error_field("time_to_compile", "must be at least 60 ms");
-	if (reunion->time_to_debug < 60)
+	if (reunion->time_to_debug < 0)
 		error_field("time_to_debug", "must be at least 60 ms");
-	if (reunion->time_to_refactor < 60)
+	if (reunion->time_to_refactor < 0)
 		error_field("time_to_refactor", "must be at least 60 ms");
 	if (reunion->number_of_compiles_required <= 0)
 		error_field("number_of_compiles_required", "must be greater than 0");
-	if (reunion->dongle_cooldown < 60)
+	if (reunion->dongle_cooldown < 0)
 		error_field("dongle_cooldown", "must be at least 60 ms");
 }
 
+/* Parses and validates all command-line arguments into reunion. */
 void	parse_input(t_reunion *reunion, char **av)
 {
 	parse_numeric_args(reunion, av);

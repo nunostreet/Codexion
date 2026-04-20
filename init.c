@@ -6,32 +6,11 @@
 /*   By: nunostreet <nunostreet@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/13 12:50:46 by nunostreet        #+#    #+#             */
-/*   Updated: 2026/04/16 15:20:39 by nunostreet       ###   ########.fr       */
+/*   Updated: 2026/04/17 15:30:45 by nunostreet       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
-
-static int	alloc_arrays(t_reunion *reunion);
-static int	init_mutexes(t_reunion *reunion);
-static int	init_dongles(t_reunion *reunion);
-static void	init_coders(t_reunion *reunion);
-
-int	init_reunion(t_reunion *reunion)
-{
-	reunion->coders = NULL;
-	reunion->dongles = NULL;
-	reunion->end_simulation = FALSE;
-	reunion->all_threads_ready = FALSE;
-	if (alloc_arrays(reunion))
-		return (1);
-	if (init_mutexes(reunion))
-		return (free(reunion->coders), free(reunion->dongles), 1);
-	if (init_dongles(reunion))
-		return (free(reunion->coders), free(reunion->dongles), 1);
-	init_coders(reunion);
-	return (0);
-}
 
 static int	alloc_arrays(t_reunion *reunion)
 {
@@ -67,16 +46,14 @@ static int	init_dongles(t_reunion *reunion)
 	i = 0;
 	while (i < reunion->number_of_coders)
 	{
+		memset(&reunion->dongles[i], 0, sizeof(t_dongle));
 		reunion->dongles[i].dongle_id = i + 1;
-		reunion->dongles[i].available = TRUE;
-		reunion->dongles[i].available_at = reunion->start_simulation;
-		if (pthread_mutex_init(&reunion->dongles[i].mutex, NULL) != 0)
+		if (pthread_mutex_init(&reunion->dongles[i].mutex, NULL))
+			return (cleanup_dongles(reunion, i), 1);
+		if (pthread_cond_init(&reunion->dongles[i].condition, NULL))
 		{
-			while (--i >= 0)
-				pthread_mutex_destroy(&reunion->dongles[i].mutex);
-			pthread_mutex_destroy(&reunion->mutexes.write);
-			pthread_mutex_destroy(&reunion->mutexes.state);
-			return (1);
+			pthread_mutex_destroy(&reunion->dongles[i].mutex);
+			return (cleanup_dongles(reunion, i), 1);
 		}
 		i++;
 	}
@@ -100,4 +77,20 @@ static void	init_coders(t_reunion *reunion)
 		reunion->coders[i].reunion = reunion;
 		i++;
 	}
+}
+
+int	init_reunion(t_reunion *reunion)
+{
+	reunion->coders = NULL;
+	reunion->dongles = NULL;
+	reunion->end_simulation = FALSE;
+	reunion->all_threads_ready = FALSE;
+	if (alloc_arrays(reunion))
+		return (1);
+	if (init_mutexes(reunion))
+		return (free(reunion->coders), free(reunion->dongles), 1);
+	if (init_dongles(reunion))
+		return (free(reunion->coders), free(reunion->dongles), 1);
+	init_coders(reunion);
+	return (0);
 }
