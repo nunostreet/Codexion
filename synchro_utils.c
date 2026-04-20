@@ -26,7 +26,7 @@ void	print_state(t_coder *coder, const char *msg)
 void	wait_all_threads(t_reunion *reunion)
 {
 	while (!get_bool(&reunion->mutexes.state, &reunion->all_threads_ready))
-		;
+		ft_sleep_ms(1);
 }
 
 /* Destroys all dongles and frees the coder and dongle arrays. */

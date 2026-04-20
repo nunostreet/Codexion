@@ -3,17 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   codexion.h                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nunostreet <nunostreet@student.42.fr>      +#+  +:+       +#+        */
+/*   By: nstreet- <nstreet-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/09 16:21:43 by nstreet-          #+#    #+#             */
-/*   Updated: 2026/04/17 15:28:26 by nunostreet       ###   ########.fr       */
+/*   Updated: 2026/04/20 18:08:52 by nstreet-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CODEXION_H
 # define CODEXION_H
-
-# define _POSIX_C_SOURCE 200809L
 
 # include <limits.h>
 # include <pthread.h>
@@ -61,7 +59,6 @@ typedef struct s_dongle
 {
 	pthread_mutex_t	mutex;
 	int				dongle_id;
-	long			available_at;
 	pthread_cond_t	condition;
 	t_req			queue[2];
 	int				queue_size;
