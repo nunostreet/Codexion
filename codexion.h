@@ -6,7 +6,7 @@
 /*   By: nunostreet <nunostreet@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/09 16:21:43 by nstreet-          #+#    #+#             */
-/*   Updated: 2026/04/17 13:07:57 by nunostreet       ###   ########.fr       */
+/*   Updated: 2026/04/17 15:28:26 by nunostreet       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,9 @@
 # include <pthread.h>
 # include <stdio.h>
 # include <stdlib.h>
+# include <string.h>
 # include <sys/time.h>
+# include <time.h>
 # include <unistd.h>
 
 # define RST "\033[0m"
@@ -45,12 +47,24 @@ typedef enum e_opcode
 	DETACH
 }	t_opcode;
 
+typedef struct s_request
+{
+	int		coder_idx;
+	long	priority;
+	long	ticket;
+	long	tie;
+}	t_req;
+
 typedef struct s_dongle
 {
 	pthread_mutex_t	mutex;
 	int				dongle_id;
-	t_bool			available;
 	long			available_at;
+	pthread_cond_t	condition;
+	t_req			queue[2];
+	int				queue_size;
+	long			seq_counter;
+	t_bool			occupied;
 }	t_dongle;
 
 typedef struct s_coder
@@ -89,13 +103,6 @@ typedef struct s_reunion
 	t_mutexes	mutexes;
 	pthread_t	monitor_thread;
 }	t_reunion;
-
-typedef struct s_request
-{
-	struct s_coder	*coder;
-	long			priority;
-	long			seq;
-}	t_request;
 
 /* utils.c */
 void	error_exit(const char *error);
@@ -146,9 +153,19 @@ void	*monitor_simulation(void *data);
 t_bool	simulation_has_ended(t_reunion *reunion);
 void	stop_simulation(t_reunion *reunion);
 
+/* heap.c */
+void	heap_push(t_req *heap, int *size, t_req elem);
+t_req	heap_peek(t_req *heap, int size);
+t_req	heap_pop(t_req *heap, int *size);
+
+/* dongles.c */
+void	request_dongle(t_dongle *d, t_coder *coder);
+void	release_dongle(t_dongle *d, long cooldown);
+
 /* synchro_utils.c */
 void	print_state(t_coder *coder, const char *msg);
 void	wait_all_threads(t_reunion *reunion);
 void	cleanup_reunion(t_reunion *reunion);
+void	cleanup_dongles(t_reunion *reunion, int count);
 
 #endif
