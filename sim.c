@@ -6,34 +6,25 @@
 /*   By: nunostreet <nunostreet@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/16 22:40:00 by nunostreet        #+#    #+#             */
-/*   Updated: 2026/04/17 14:15:35 by nunostreet       ###   ########.fr       */
+/*   Updated: 2026/04/17 15:11:21 by nunostreet       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
 
+/* Thread-safe read of the end_simulation flag. */
 t_bool	simulation_has_ended(t_reunion *reunion)
 {
 	return (get_bool(&reunion->mutexes.state, &reunion->end_simulation));
 }
 
-void	*code_simulation(void *data)
+static void	coder_loop(t_coder *coder)
 {
-	t_coder	*coder;
-
-	coder = (t_coder *)data;
-	wait_all_threads(coder->reunion);
 	while (!simulation_has_ended(coder->reunion))
 	{
 		if (get_bool(&coder->reunion->mutexes.state, &coder->finished))
 			break ;
 		grab_dongles(coder);
-		if (coder->left_dongle == coder->right_dongle)
-		{
-			precise_sleep(coder->reunion, coder->reunion->time_to_burnout);
-			drop_dongles(coder);
-			return (NULL);
-		}
 		compile(coder);
 		drop_dongles(coder);
 		if (get_bool(&coder->reunion->mutexes.state, &coder->finished))
@@ -41,9 +32,30 @@ void	*code_simulation(void *data)
 		debug(coder);
 		refactor(coder);
 	}
+}
+
+/* Entry point for each coder thread: runs the compile/debug/refactor loop. */
+void	*code_simulation(void *data)
+{
+	t_coder	*coder;
+
+	coder = (t_coder *)data;
+	wait_all_threads(coder->reunion);
+	if (coder->id % 2 == 0)
+		usleep(1000);
+	set_long(&coder->reunion->mutexes.state,
+		&coder->last_compile_start, get_time_ms());
+	if (coder->left_dongle == coder->right_dongle)
+	{
+		while (!simulation_has_ended(coder->reunion))
+			usleep(1000);
+		return (NULL);
+	}
+	coder_loop(coder);
 	return (NULL);
 }
 
+/* Spawns all coder threads and the monitor, then joins them. */
 void	start_simulation(t_reunion *reunion)
 {
 	int	i;
