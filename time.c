@@ -39,13 +39,12 @@ void	ft_sleep_ms(long ms)
 }
 
 /* Sleeps for duration ms, checking every 1-5ms to avoid overshooting. */
-void	precise_sleep(t_reunion *reunion, long duration)
+void	precise_sleep(long duration)
 {
 	long	start;
 	long	elapsed;
 	long	remaining;
 
-	(void)reunion;
 	start = get_time_ms();
 	while (elapsed_ms(start) < duration)
 	{
