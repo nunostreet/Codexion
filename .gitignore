@@ -1,4 +1,6 @@
 *.o
 .DS_Store
 .vscode
-.claudecodexion
+.claude
+.codexion
+.claude
