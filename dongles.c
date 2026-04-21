@@ -13,13 +13,13 @@
 #include "codexion.h"
 
 /* Fills a t_req according to the chosen scheduler (fifo or edf). */
-static t_req	build_request(t_dongle *d, t_coder *coder)
+static t_req	build_request(t_dongle *dongle, t_coder *coder)
 {
 	t_req	req;
 	long	last;
 
 	req.coder_idx = coder->id - 1;
-	req.ticket = d->seq_counter++;
+	req.ticket = dongle->seq_counter++;
 	if (strcmp(coder->reunion->scheduler, "edf") == 0)
 	{
 		last = get_long(&coder->reunion->mutexes.state,
@@ -36,40 +36,40 @@ static t_req	build_request(t_dongle *d, t_coder *coder)
 }
 
 /* Blocks on cond_wait until this coder is at the top of the queue. */
-static void	wait_for_grant(t_dongle *d, t_coder *coder, t_req req)
+static void	wait_for_grant(t_dongle *dongle, t_coder *coder, t_req req)
 {
 	while (!simulation_has_ended(coder->reunion))
 	{
-		if (heap_peek(d->queue, d->queue_size).coder_idx == req.coder_idx
-			&& !d->occupied)
+		if (heap_peek(dongle->queue, dongle->queue_size).coder_idx == req.coder_idx
+			&& !dongle->occupied)
 			break ;
-		pthread_cond_wait(&d->condition, &d->mutex);
+		pthread_cond_wait(&dongle->condition, &dongle->mutex);
 	}
 }
 
 /* Enqueues a request and blocks until the dongle is granted to this coder. */
-void	request_dongle(t_dongle *d, t_coder *coder)
+void	request_dongle(t_dongle *dongle, t_coder *coder)
 {
 	t_req	req;
 
-	safe_mutex_handle(&d->mutex, LOCK);
-	req = build_request(d, coder);
-	heap_push(d->queue, &d->queue_size, req);
-	wait_for_grant(d, coder, req);
+	safe_mutex_handle(&dongle->mutex, LOCK);
+	req = build_request(dongle, coder);
+	heap_push(dongle->queue, &dongle->queue_size, req);
+	wait_for_grant(dongle, coder, req);
 	if (!simulation_has_ended(coder->reunion))
-		d->occupied = TRUE;
-	safe_mutex_handle(&d->mutex, UNLOCK);
+		dongle->occupied = TRUE;
+	safe_mutex_handle(&dongle->mutex, UNLOCK);
 }
 
 /* Pops request, sleeps cooldown, marks dongle free, then wakes waiters. */
-void	release_dongle(t_dongle *d, long cooldown)
+void	release_dongle(t_dongle *dongle, long cooldown)
 {
-	safe_mutex_handle(&d->mutex, LOCK);
-	heap_pop(d->queue, &d->queue_size);
-	safe_mutex_handle(&d->mutex, UNLOCK);
+	safe_mutex_handle(&dongle->mutex, LOCK);
+	heap_pop(dongle->queue, &dongle->queue_size);
+	safe_mutex_handle(&dongle->mutex, UNLOCK);
 	ft_sleep_ms(cooldown);
-	safe_mutex_handle(&d->mutex, LOCK);
-	d->occupied = FALSE;
-	pthread_cond_broadcast(&d->condition);
-	safe_mutex_handle(&d->mutex, UNLOCK);
+	safe_mutex_handle(&dongle->mutex, LOCK);
+	dongle->occupied = FALSE;
+	pthread_cond_broadcast(&dongle->condition);
+	safe_mutex_handle(&dongle->mutex, UNLOCK);
 }
