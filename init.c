@@ -71,9 +71,9 @@ static void	init_coders(t_reunion *reunion)
 		reunion->coders[i].compile_counter = 0;
 		reunion->coders[i].last_compile_start = reunion->start_simulation;
 		reunion->coders[i].finished = FALSE;
-		reunion->coders[i].left_dongle = &reunion->dongles[i];
-		reunion->coders[i].right_dongle = &reunion->dongles[(i + 1)
+		reunion->coders[i].left_dongle = &reunion->dongles[(i + 1)
 			% reunion->number_of_coders];
+		reunion->coders[i].right_dongle = &reunion->dongles[i];
 		reunion->coders[i].reunion = reunion;
 		i++;
 	}
