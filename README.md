@@ -61,7 +61,7 @@ The FIFO scheduler guarantees each request is served in strict arrival order. Un
 
 ### Cooldown handling
 
-After a dongle is released, it is marked unavailable until `available_at = release_time + dongle_cooldown`. Waiting coders use `pthread_cond_timedwait` with a 1 ms wake interval and check `get_time_ms() >= available_at` before proceeding. This prevents a coder from immediately re-acquiring a dongle it just released.
+After a coder is granted a dongle and its request is popped from the heap, the dongle is marked `occupied = TRUE`. When the coder releases it, `release_dongle` sleeps for `dongle_cooldown` ms outside the mutex, then sets `occupied = FALSE` and broadcasts. This prevents a coder from immediately re-acquiring a dongle it just released, while not blocking other threads during the cooldown sleep.
 
 ### Precise burnout detection
 
@@ -86,7 +86,7 @@ Each dongle also has its own **`dongle.mutex`** which protects the priority queu
 
 ### Condition variables (`pthread_cond_t`)
 
-Each dongle has a `pthread_cond_t condition`. When a coder cannot acquire a dongle (not at the top of the priority heap, dongle occupied, or cooldown active), it calls `pthread_cond_timedwait`, releasing the dongle mutex and sleeping up to 1 ms. When a dongle is released, `pthread_cond_broadcast` wakes all waiters so the next eligible coder can proceed immediately.
+Each dongle has a `pthread_cond_t condition`. When a coder cannot acquire a dongle (not at the top of the priority heap or dongle occupied), it calls `pthread_cond_wait`, atomically releasing the dongle mutex and sleeping. When a dongle is released, `pthread_cond_broadcast` wakes all waiters so the next eligible coder can proceed immediately.
 
 **Thread-safe communication between coders and monitor:** the monitor sets `end_simulation` via `set_bool` (locked), and all coder threads check it via `get_bool` (locked) in their main loop and inside `request_dongle`. This guarantees that when the monitor signals the end, all threads see it and exit gracefully within one scheduling cycle.
 
@@ -99,16 +99,48 @@ Each dongle owns a min-heap of `t_request` entries with a fixed capacity of 2, s
 
 With at most 2 entries, push and pop reduce to a single comparison — O(1). A coder is granted the dongle only when its request is at the heap root, ensuring fair arbitration.
 
+## Choosing safe timing parameters
+
+A coder's full cycle, measured from the start of one compilation to the start of the next, is:
+
+```
+T_cycle = t_compile + 2×t_cooldown + t_debug + t_refactor + W
+```
+
+where `W` is the time spent waiting for dongles. Burnout occurs when `T_cycle > t_burnout`.
+
+`W` depends on contention. In the worst case a coder arrives just as both neighbours begin compiling and must wait for one to finish and release its dongle:
+
+- **Even number of coders** — coders pair naturally; worst-case wait is one compile plus one cooldown per dongle:
+  `W_max = 2×(t_compile + t_cooldown)`
+- **Odd number of coders** — one coder is always excluded per round and may face an extra cooldown:
+  `W_max = 2×t_compile + 3×t_cooldown`
+
+Substituting `W_max` (odd, conservative for any N):
+
+```
+t_burnout > 3×t_compile + 3×t_cooldown + t_debug + t_refactor
+```
+
+Using the example `./codexion 5 1000 200 200 100 2 100 edf`:
+
+```
+3×200 + 3×100 + 200 + 100 = 1200 ms  →  t_burnout=1000 ms is too tight
+```
+
+The monitor detects burnout a few milliseconds after the deadline because it runs in a polling loop, which accounts for the small overshoot visible in the log (e.g. `1020 ms` instead of exactly `1000 ms`).
+
 ## Resources
 
 ### Concurrency and synchronization
 
 - [POSIX Threads Programming — Blaise Barney, LLNL](https://hpc-tutorials.llnl.gov/posix/)
-- [The Little Book of Semaphores — Allen B. Downey](https://greenteapress.com/wp/semaphores/)
 - [Operating Systems: Three Easy Pieces — Arpaci-Dusseau](https://pages.cs.wisc.edu/~remzi/OSTEP/) (chapters on concurrency)
-- `man pthread_mutex_init`, `man pthread_cond_timedwait`, `man gettimeofday`
+- `man pthread_mutex_init`, `man pthread_cond_wait`, `man gettimeofday`
 - https://pages.cs.wisc.edu/~remzi/OSTEP/threads-locks.pdf
 - https://man7.org/linux/man-pages/man3/timeval.3type.html
+- [The Dining Philosophers in C: threads, race conditions and deadlocks](https://www.youtube.com/watch?v=zOpzGHwJ3MU&t=4906s)
+- [Philosophers, 42 School Project. Dining Philosophers Project. C Implementation](https://www.youtube.com/watch?v=UGQsvVKwe90&t=2065s)
 
 ### Scheduling algorithms
 
