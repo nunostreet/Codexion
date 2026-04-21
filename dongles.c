@@ -61,7 +61,7 @@ void	request_dongle(t_dongle *d, t_coder *coder)
 	safe_mutex_handle(&d->mutex, UNLOCK);
 }
 
-/* Pops this coder's request, sleeps for cooldown, then releases and wakes waiters. */
+/* Pops request, sleeps cooldown, marks dongle free, then wakes waiters. */
 void	release_dongle(t_dongle *d, long cooldown)
 {
 	safe_mutex_handle(&d->mutex, LOCK);

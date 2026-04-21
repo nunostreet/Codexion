@@ -12,7 +12,7 @@
 
 #include "codexion.h"
 
-/* Sets end_simulation to TRUE and wakes all threads blocked on dongle condvars. */
+/* Sets end flag and wakes all threads blocking on dongle condvars. */
 void	stop_simulation(t_reunion *reunion)
 {
 	int	i;

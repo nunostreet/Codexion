@@ -12,6 +12,12 @@
 
 #include "codexion.h"
 
+/* Thread-safe read of the end_simulation flag. */
+t_bool	simulation_has_ended(t_reunion *reunion)
+{
+	return (get_bool(&reunion->mutexes.state, &reunion->end_simulation));
+}
+
 /* Prints a timestamped state line, serialised by the write mutex. */
 void	print_state(t_coder *coder, const char *msg)
 {

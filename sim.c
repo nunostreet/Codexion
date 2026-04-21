@@ -12,12 +12,6 @@
 
 #include "codexion.h"
 
-/* Thread-safe read of the end_simulation flag. */
-t_bool	simulation_has_ended(t_reunion *reunion)
-{
-	return (get_bool(&reunion->mutexes.state, &reunion->end_simulation));
-}
-
 static void	coder_loop(t_coder *coder)
 {
 	while (!simulation_has_ended(coder->reunion))
@@ -55,6 +49,35 @@ void	*code_simulation(void *data)
 	return (NULL);
 }
 
+/* Sets last_compile_start for all coders to the simulation start time. */
+static void	init_compile_starts(t_reunion *reunion)
+{
+	int	i;
+
+	i = 0;
+	while (i < reunion->number_of_coders)
+	{
+		set_long(&reunion->mutexes.state,
+			&reunion->coders[i].last_compile_start,
+			reunion->start_simulation);
+		i++;
+	}
+}
+
+/* Joins all coder threads and the monitor thread. */
+static void	join_all_threads(t_reunion *reunion)
+{
+	int	i;
+
+	i = 0;
+	while (i < reunion->number_of_coders)
+	{
+		safe_thread_handle(&reunion->coders[i].thread_id, NULL, NULL, JOIN);
+		i++;
+	}
+	safe_thread_handle(&reunion->monitor_thread, NULL, NULL, JOIN);
+}
+
 /* Spawns all coder threads and the monitor, then joins them. */
 void	start_simulation(t_reunion *reunion)
 {
@@ -72,20 +95,7 @@ void	start_simulation(t_reunion *reunion)
 	safe_thread_handle(&reunion->monitor_thread,
 		monitor_simulation, reunion, CREATE);
 	reunion->start_simulation = get_time_ms();
-	i = 0;
-	while (i < reunion->number_of_coders)
-	{
-		set_long(&reunion->mutexes.state,
-			&reunion->coders[i].last_compile_start,
-			reunion->start_simulation);
-		i++;
-	}
+	init_compile_starts(reunion);
 	set_bool(&reunion->mutexes.state, &reunion->all_threads_ready, TRUE);
-	i = 0;
-	while (i < reunion->number_of_coders)
-	{
-		safe_thread_handle(&reunion->coders[i].thread_id, NULL, NULL, JOIN);
-		i++;
-	}
-	safe_thread_handle(&reunion->monitor_thread, NULL, NULL, JOIN);
+	join_all_threads(reunion);
 }
