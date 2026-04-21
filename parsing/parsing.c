@@ -30,14 +30,16 @@ static void	validate_numeric_args(t_reunion *reunion)
 {
 	if (reunion->number_of_coders <= 0)
 		error_field("number_of_coders", "must be greater than 0");
+	if (reunion->number_of_coders > 256)
+		error_field("number_of_coders", "must be at most 256");
 	if (reunion->time_to_burnout <= 0)
-		error_field("time_to_burnout", "must be at least 0 ms");
-	if (reunion->time_to_compile < 0)
-		error_field("time_to_compile", "must be at least 0 ms");
-	if (reunion->time_to_debug < 0)
-		error_field("time_to_debug", "must be at least 0 ms");
-	if (reunion->time_to_refactor < 0)
-		error_field("time_to_refactor", "must be at least 0 ms");
+		error_field("time_to_burnout", "must be greater than 0 ms");
+	if (reunion->time_to_compile <= 0)
+		error_field("time_to_compile", "must be greater than 0 ms");
+	if (reunion->time_to_debug <= 0)
+		error_field("time_to_debug", "must be greater than 0 ms");
+	if (reunion->time_to_refactor <= 0)
+		error_field("time_to_refactor", "must be greater than 0 ms");
 	if (reunion->number_of_compiles_required <= 0)
 		error_field("number_of_compiles_required", "must be greater than 0");
 	if (reunion->dongle_cooldown < 0)

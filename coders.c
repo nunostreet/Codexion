@@ -60,7 +60,7 @@ void	drop_dongles(t_coder *coder)
 void	debug(t_coder *coder)
 {
 	print_state(coder, "is debugging");
-	precise_sleep(coder->reunion->time_to_debug);
+	precise_sleep(coder->reunion, coder->reunion->time_to_debug);
 }
 
 /* Resets the burnout timer, increments counter, sleeps for compile duration. */
@@ -70,7 +70,7 @@ void	compile(t_coder *coder)
 		get_time_ms());
 	increment_long(&coder->reunion->mutexes.state, &coder->compile_counter);
 	print_state(coder, "is compiling");
-	precise_sleep(coder->reunion->time_to_compile);
+	precise_sleep(coder->reunion, coder->reunion->time_to_compile);
 	if (get_long(&coder->reunion->mutexes.state, &coder->compile_counter)
 		>= coder->reunion->number_of_compiles_required)
 		set_bool(&coder->reunion->mutexes.state, &coder->finished, TRUE);
@@ -80,5 +80,5 @@ void	compile(t_coder *coder)
 void	refactor(t_coder *coder)
 {
 	print_state(coder, "is refactoring");
-	precise_sleep(coder->reunion->time_to_refactor);
+	precise_sleep(coder->reunion, coder->reunion->time_to_refactor);
 }

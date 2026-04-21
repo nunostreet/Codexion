@@ -61,10 +61,10 @@ long	parse_long_arg(const char *str, const char *field_name)
 	str = valid_input(str, field_name);
 	while (ft_isdigit(*str))
 	{
+		if (num > (INT_MAX - (*str - '0')) / 10)
+			error_field(field_name, "exceeds INT_MAX");
 		num = num * 10 + (*str - '0');
 		++str;
 	}
-	if (num > INT_MAX)
-		error_field(field_name, "exceeds INT_MAX");
 	return (num);
 }

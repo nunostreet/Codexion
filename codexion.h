@@ -123,7 +123,7 @@ int		init_reunion(t_reunion *reunion);
 long	get_time_ms(void);
 long	elapsed_ms(long start);
 void	ft_sleep_ms(long ms);
-void	precise_sleep(long duration);
+void	precise_sleep(t_reunion *reunion, long duration);
 
 /* safe_functions.c */
 void	safe_mutex_handle(pthread_mutex_t *mutex, t_opcode opcode);

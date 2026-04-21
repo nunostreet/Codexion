@@ -6,7 +6,7 @@
 /*   By: nunostreet <nunostreet@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/17 14:55:01 by nunostreet        #+#    #+#             */
-/*   Updated: 2026/04/17 15:45:42 by nunostreet       ###   ########.fr       */
+/*   Updated: 2026/04/21 19:37:47 by nunostreet       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,8 +40,8 @@ static void	wait_for_grant(t_dongle *dongle, t_coder *coder, t_req req)
 {
 	while (!simulation_has_ended(coder->reunion))
 	{
-		if (heap_peek(dongle->queue, dongle->queue_size).coder_idx == req.coder_idx
-			&& !dongle->occupied)
+		if (heap_peek(dongle->queue, dongle->queue_size).coder_idx
+			== req.coder_idx && !dongle->occupied)
 			break ;
 		pthread_cond_wait(&dongle->condition, &dongle->mutex);
 	}
@@ -56,6 +56,7 @@ void	request_dongle(t_dongle *dongle, t_coder *coder)
 	req = build_request(dongle, coder);
 	heap_push(dongle->queue, &dongle->queue_size, req);
 	wait_for_grant(dongle, coder, req);
+	heap_pop(dongle->queue, &dongle->queue_size);
 	if (!simulation_has_ended(coder->reunion))
 		dongle->occupied = TRUE;
 	safe_mutex_handle(&dongle->mutex, UNLOCK);
@@ -64,9 +65,6 @@ void	request_dongle(t_dongle *dongle, t_coder *coder)
 /* Pops request, sleeps cooldown, marks dongle free, then wakes waiters. */
 void	release_dongle(t_dongle *dongle, long cooldown)
 {
-	safe_mutex_handle(&dongle->mutex, LOCK);
-	heap_pop(dongle->queue, &dongle->queue_size);
-	safe_mutex_handle(&dongle->mutex, UNLOCK);
 	ft_sleep_ms(cooldown);
 	safe_mutex_handle(&dongle->mutex, LOCK);
 	dongle->occupied = FALSE;
