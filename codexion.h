@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   codexion.h                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nstreet- <nstreet-@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nunostreet <nunostreet@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/09 16:21:43 by nstreet-          #+#    #+#             */
-/*   Updated: 2026/04/20 18:08:52 by nstreet-         ###   ########.fr       */
+/*   Updated: 2026/04/22 23:59:27 by nunostreet       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,7 @@ typedef struct s_dongle
 	t_req			queue[2];
 	int				queue_size;
 	long			seq_counter;
+	long			available_at;
 	t_bool			occupied;
 }	t_dongle;
 

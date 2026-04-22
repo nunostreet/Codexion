@@ -6,7 +6,7 @@
 /*   By: nunostreet <nunostreet@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/17 14:55:01 by nunostreet        #+#    #+#             */
-/*   Updated: 2026/04/21 19:37:47 by nunostreet       ###   ########.fr       */
+/*   Updated: 2026/04/22 23:59:48 by nunostreet       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,11 +38,21 @@ static t_req	build_request(t_dongle *dongle, t_coder *coder)
 /* Blocks on cond_wait until this coder is at the top of the queue. */
 static void	wait_for_grant(t_dongle *dongle, t_coder *coder, t_req req)
 {
+	long	remaining;
+
 	while (!simulation_has_ended(coder->reunion))
 	{
 		if (heap_peek(dongle->queue, dongle->queue_size).coder_idx
 			== req.coder_idx && !dongle->occupied)
-			break ;
+		{
+			remaining = dongle->available_at - get_time_ms();
+			if (remaining <= 0)
+				break ;
+			safe_mutex_handle(&dongle->mutex, UNLOCK);
+			ft_sleep_ms(remaining);
+			safe_mutex_handle(&dongle->mutex, LOCK);
+			continue ;
+		}
 		pthread_cond_wait(&dongle->condition, &dongle->mutex);
 	}
 }
@@ -65,9 +75,9 @@ void	request_dongle(t_dongle *dongle, t_coder *coder)
 /* Pops request, sleeps cooldown, marks dongle free, then wakes waiters. */
 void	release_dongle(t_dongle *dongle, long cooldown)
 {
-	ft_sleep_ms(cooldown);
 	safe_mutex_handle(&dongle->mutex, LOCK);
 	dongle->occupied = FALSE;
+	dongle->available_at = get_time_ms() + cooldown;
 	pthread_cond_broadcast(&dongle->condition);
 	safe_mutex_handle(&dongle->mutex, UNLOCK);
 }

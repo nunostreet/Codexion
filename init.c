@@ -6,7 +6,7 @@
 /*   By: nunostreet <nunostreet@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/13 12:50:46 by nunostreet        #+#    #+#             */
-/*   Updated: 2026/04/17 15:30:45 by nunostreet       ###   ########.fr       */
+/*   Updated: 2026/04/23 00:00:20 by nunostreet       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,7 @@ static int	init_dongles(t_reunion *reunion)
 	{
 		memset(&reunion->dongles[i], 0, sizeof(t_dongle));
 		reunion->dongles[i].dongle_id = i + 1;
+		reunion->dongles[i].available_at = get_time_ms();
 		if (pthread_mutex_init(&reunion->dongles[i].mutex, NULL))
 			return (cleanup_dongles(reunion, i), 1);
 		if (pthread_cond_init(&reunion->dongles[i].condition, NULL))
