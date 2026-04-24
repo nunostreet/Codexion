@@ -162,6 +162,7 @@ t_req	heap_pop(t_req *heap, int *size);
 /* dongles.c */
 void	request_dongle(t_dongle *d, t_coder *coder);
 void	release_dongle(t_dongle *d, long cooldown);
+void	wait_cooldowns(t_coder *coder);
 
 /* synchro_utils.c */
 void	print_state(t_coder *coder, const char *msg);

@@ -38,23 +38,31 @@ static t_req	build_request(t_dongle *dongle, t_coder *coder)
 /* Blocks on cond_wait until this coder is at the top of the queue. */
 static void	wait_for_grant(t_dongle *dongle, t_coder *coder, t_req req)
 {
-	long	remaining;
-
 	while (!simulation_has_ended(coder->reunion))
 	{
 		if (heap_peek(dongle->queue, dongle->queue_size).coder_idx
 			== req.coder_idx && !dongle->occupied)
-		{
-			remaining = dongle->available_at - get_time_ms();
-			if (remaining <= 0)
-				break ;
-			safe_mutex_handle(&dongle->mutex, UNLOCK);
-			ft_sleep_ms(remaining);
-			safe_mutex_handle(&dongle->mutex, LOCK);
-			continue ;
-		}
+			break ;
 		pthread_cond_wait(&dongle->condition, &dongle->mutex);
 	}
+}
+
+/* Waits for the remaining cooldown of both dongles after grabbing them. */
+void	wait_cooldowns(t_coder *coder)
+{
+	long	avail;
+	long	remaining;
+
+	safe_mutex_handle(&coder->left_dongle->mutex, LOCK);
+	avail = coder->left_dongle->available_at;
+	safe_mutex_handle(&coder->left_dongle->mutex, UNLOCK);
+	safe_mutex_handle(&coder->right_dongle->mutex, LOCK);
+	if (coder->right_dongle->available_at > avail)
+		avail = coder->right_dongle->available_at;
+	safe_mutex_handle(&coder->right_dongle->mutex, UNLOCK);
+	remaining = avail - get_time_ms();
+	if (remaining > 0)
+		precise_sleep(coder->reunion, remaining);
 }
 
 /* Enqueues a request and blocks until the dongle is granted to this coder. */

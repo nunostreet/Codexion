@@ -32,6 +32,7 @@ void	grab_dongles(t_coder *coder)
 	print_state(coder, "has taken a dongle");
 	request_dongle(second, coder);
 	print_state(coder, "has taken a dongle");
+	wait_cooldowns(coder);
 }
 
 /* Releases both dongles with cooldown in reverse acquisition order. */

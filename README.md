@@ -57,11 +57,15 @@ Deadlock is prevented by imposing a **global dongle acquisition order**: each co
 
 Even-numbered coders sleep 1 ms after the simulation start before competing for dongles. This staggers the initial burst of acquisition attempts, preventing the chain scenario where every coder holds its first dongle simultaneously and blocks its neighbour.
 
+Coders do not wait for cooldowns inside the priority queue. `wait_cooldowns` is called only after both dongles are already claimed (`occupied = TRUE`). This closes the race window where the previous holder could re-enqueue with a lower-sequence ticket and reclaim a dongle before the waiting coder's cooldown elapsed.
+
 The FIFO scheduler guarantees each request is served in strict arrival order. Under EDF, the coder closest to burnout is always served first; combined with feasible timing parameters, no coder is starved.
 
 ### Cooldown handling
 
-After a coder is granted a dongle and its request is popped from the heap, the dongle is marked `occupied = TRUE`. When the coder releases it, `release_dongle` sleeps for `dongle_cooldown` ms outside the mutex, then sets `occupied = FALSE` and broadcasts. This prevents a coder from immediately re-acquiring a dongle it just released, while not blocking other threads during the cooldown sleep.
+When a coder releases a dongle, `release_dongle` immediately sets `occupied = FALSE`, records `available_at = now + dongle_cooldown`, and broadcasts on the condition variable. Waiting coders claim the dongle as soon as it is unoccupied — no cooldown is waited inside the priority queue.
+
+After claiming both dongles, `grab_dongles` calls `wait_cooldowns`, which reads `available_at` from each dongle under its mutex and sleeps for `max(D1.available_at, D2.available_at) − now`. Enforcing the cooldown after the grab ensures the previous holder cannot sneak back into the queue while a waiting coder is sleeping for a per-dongle cooldown.
 
 ### Precise burnout detection
 
@@ -104,28 +108,27 @@ With at most 2 entries, push and pop reduce to a single comparison — O(1). A c
 A coder's full cycle, measured from the start of one compilation to the start of the next, is:
 
 ```
-T_cycle = t_compile + 2×t_cooldown + t_debug + t_refactor + W
+T_cycle = t_compile + t_cooldown + t_debug + t_refactor + W
 ```
 
-where `W` is the time spent waiting for dongles. Burnout occurs when `T_cycle > t_burnout`.
+where `W` is the time spent waiting for both dongles to become unoccupied, and `t_cooldown` is the single `wait_cooldowns` call (which waits for `max(D1_remaining, D2_remaining) ≤ t_cooldown`). Burnout occurs when `T_cycle > t_burnout`.
 
-`W` depends on contention. In the worst case a coder arrives just as both neighbours begin compiling and must wait for one to finish and release its dongle:
-
-- **Even number of coders** — coders pair naturally; worst-case wait is one compile plus one cooldown per dongle:
-  `W_max = 2×(t_compile + t_cooldown)`
-- **Odd number of coders** — one coder is always excluded per round and may face an extra cooldown:
-  `W_max = 2×t_compile + 3×t_cooldown`
-
-Substituting `W_max` (odd, conservative for any N):
+In the worst case a coder arrives just as both neighbours begin compiling and must wait for each to finish. Because `wait_cooldowns` takes the maximum of both dongles' remaining cooldowns rather than summing them, the even/odd distinction that existed before no longer applies:
 
 ```
-t_burnout > 3×t_compile + 3×t_cooldown + t_debug + t_refactor
+W_max = 2×t_compile  (for any N ≥ 3)
 ```
 
-Using the example `./codexion 5 1000 200 200 100 2 100 edf`:
+Substituting:
 
 ```
-3×200 + 3×100 + 200 + 100 = 1200 ms  →  t_burnout=1000 ms is too tight
+t_burnout > 3×t_compile + t_cooldown + t_debug + t_refactor
+```
+
+Using the example `./codexion 5 1200 200 200 100 2 100 edf`:
+
+```
+3×200 + 100 + 200 + 100 = 1000 ms  →  t_burnout=1200 ms is safe (200 ms margin)
 ```
 
 The monitor detects burnout a few milliseconds after the deadline because it runs in a polling loop, which accounts for the small overshoot visible in the log (e.g. `1020 ms` instead of exactly `1000 ms`).
