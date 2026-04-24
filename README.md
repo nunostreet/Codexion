@@ -113,10 +113,10 @@ T_cycle = t_compile + t_cooldown + t_debug + t_refactor + W
 
 where `W` is the time spent waiting for both dongles to become unoccupied, and `t_cooldown` is the single `wait_cooldowns` call (which waits for `max(D1_remaining, D2_remaining) ≤ t_cooldown`). Burnout occurs when `T_cycle > t_burnout`.
 
-In the worst case a coder arrives just as both neighbours begin compiling and must wait for each to finish. Because `wait_cooldowns` takes the maximum of both dongles' remaining cooldowns rather than summing them, the even/odd distinction that existed before no longer applies:
+In the worst case, the two neighbours' compilations are staggered: coder C waits `t_compile` for the left dongle, claims it, then finds the right dongle has just been taken for another full `t_compile`. Because acquisition is ordered (lower ID first), coder C cannot claim both simultaneously and must wait through each neighbour's compilation in sequence:
 
 ```
-W_max = 2×t_compile  (for any N ≥ 3)
+W_max = 2×t_compile  (for any N ≥ 4)
 ```
 
 Substituting:
@@ -124,6 +124,17 @@ Substituting:
 ```
 t_burnout > 3×t_compile + t_cooldown + t_debug + t_refactor
 ```
+
+This is a sufficient condition for all N ≥ 4 but is conservative for N=3.
+
+**N=3 special case:** every pair of coders shares a dongle, so only one coder can compile at a time — compilations are fully serialised. The staggered double-wait is impossible; while you wait for neighbour A, neighbour B is also blocked. `W_max = t_compile` for N=3, and the three coders rotate through compile slots of `t_compile + t_cooldown` each:
+
+```
+T_cycle (N=3) = N × (t_compile + t_cooldown)   when t_debug + t_refactor < (N−1) × (t_compile + t_cooldown)
+              = t_compile + t_cooldown + t_debug + t_refactor   otherwise
+```
+
+So for N=3 the safe bound is simply `t_burnout > T_cycle (N=3)` — often much lower than the general formula.
 
 Using the example `./codexion 5 1200 200 200 100 2 100 edf`:
 
